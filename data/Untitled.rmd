@@ -1,0 +1,23 @@
+```{r}
+library(tidyverse)
+```
+```{r}
+preen <- read_csv("preening data/peafowl_preening_data.csv")
+```
+```{r}
+preen %>%
+  ggplot(aes(x=weight, y=back_preening, color=sex))+
+  geom_point()
+```
+
+
+```{r}
+preen %>%
+  group_by(sex) %>%
+  summarise(mean_weight=mean(weight, na.rm=T)) %>%
+  ggplot(aes(x=sex, y=mean_weight))+
+  geom_col()
+```
+
+
+
