@@ -1,0 +1,57 @@
+---
+title: "eBird"
+output: html_document
+date: "2026-02-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+
+```{r}
+getwd()
+```
+```{r}
+setwd("/Users/Jacqu/OneDrive/Documents/rbird/ebd_US-CA-113_202601_202602_smp_relJan-2026")
+```
+
+```{r}
+e_sampling <- read.csv("ebd_US-CA-113_202601_202602_smp_relJan-2026_sampling.csv", na="") %>%
+  clean_names()
+```
+
+```{r}
+e_species <- read.csv("ebd_US-CA-113_202601_202602_smp_relJan-2026.csv", na="") %>%
+  clean_names()
+```
+
+```{r}
+joined_data <- full_join(e_sampling, e_species, by="sampling_event_identifier")
+```
+
+```{r}
+summary(e_sampling)
+```
+```{r}
+glimpse(e_sampling)
+```
+```{r}
+e_sampling %>%
+  distinct(number_observers)
+```
+
+```{r}
+joined_data <- joined_data %>%
+  select(!breeding_code & !breeding_category & !behavior_code & !age_sex & !subspecies_common_name & !subspecies_scientific_name & !iba_code.x & !iba_code.y & !usfws_code.x & !usfws_code.y & !atlas_block.x & !atlas_block.y & !effort_area_ha.x & !all_species_reported.x)
+```
+
+```{r}
+write_csv(joined_data, file="joined_data_clean.csv")
+```
+
