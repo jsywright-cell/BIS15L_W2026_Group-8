@@ -1,0 +1,57 @@
+---
+title: "WIP_josephine"
+author: "Josephine Wright"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+---
+title: "eBird"
+author: "Josephine Wright"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+setwd("~/Desktop/BIS15L_W2026_Group-8/rbird/ebd_US-CA-113_202601_202602_smp_relJan-2026")
+```
+
+
+```{r}
+getwd()
+```
+
+```{r}
+e_sampling <- read.csv("ebd_US-CA-113_202601_202602_smp_relJan-2026_sampling.csv", na="") %>%
+  clean_names()
+```
+
+```{r}
+e_species <- read.csv("ebd_US-CA-113_202601_202602_smp_relJan-2026.csv", na="") %>%
+  clean_names()
+```
+
+Items to clean up data more:
+- remove .x and .y (either completely or creating a single column)
+- select only necessary and/or interesting variables to keep in final ebird table
+- possibly pivot wider
+
+```{r}
+joined_ebird_data <- full_join(e_sampling, e_species, by="sampling_event_identifier")
+```
+
+Brief studies
+
+```{r}
+joined_ebird_data %>% 
+  distinct(common_name, scientific_name)
+```
