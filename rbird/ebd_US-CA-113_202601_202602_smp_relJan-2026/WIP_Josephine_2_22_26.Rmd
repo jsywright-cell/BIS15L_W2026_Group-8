@@ -25,7 +25,6 @@ library(janitor)
 setwd("~/Desktop/BIS15L_W2026_Group-8/rbird/ebd_US-CA-113_202601_202602_smp_relJan-2026")
 ```
 
-
 ```{r}
 getwd()
 ```
