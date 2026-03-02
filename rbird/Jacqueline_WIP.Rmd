@@ -1,0 +1,98 @@
+---
+title: "ebird"
+output: html_document
+date: "2026-02-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+```{r}
+getwd()
+```
+
+```{r}
+species <- read.delim("ebd_US-CA-113_201801_202312_smp_relJan-2026.txt", quote = "", na="") %>% clean_names()
+```
+
+```{r}
+species <- species %>%
+  select(taxonomic_order, common_name, scientific_name, observation_count, locality, latitude, longitude, observation_date, observer_id, sampling_event_identifier, observation_type, duration_minutes, effort_distance_km, number_observers)
+```
+```{r}
+species <- species %>%
+  separate(observation_date, into = c("year", "month", "day"), sep = "-")
+```
+
+```{r}
+species <- species %>%
+  mutate(across(c("year", "month", "day"), as.factor))
+```
+
+```{r}
+species <- species %>%
+  filter(year!=2018 & year!= 2022 & year!=2023 & observation_count!="X")
+```
+
+```{r}
+write_csv(species, "species_data.csv")
+```
+
+
+```{r}
+samples <- read.delim("ebd_US-CA-113_201801_202312_smp_relJan-2026_sampling.txt", quote = "", na="") %>% clean_names()
+```
+
+```{r}
+total_data <- full_join(species, samples, by="sampling_event_identifier")
+```
+
+```{r}
+total_data <- total_data %>%
+  select(common_name, scientific_name, observation_count, locality.x, latitude.x, longitude.x, observer_id.x, sampling_event_identifier, observation_type.x, duration_minutes.x, effort_distance_km.x, number_observers.x, year, month, day)
+```
+
+```{r}
+glimpse(total_data)
+```
+```{r}
+samples %>%
+  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
+  ggplot(aes(x=month, fill=year))+
+  geom_bar(position="dodge")
+```
+```{r}
+samples %>%
+  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
+  filter(year=="2020") %>%
+  ggplot(aes(x=month, fill=year))+
+  geom_bar(position="dodge")
+```
+```{r}
+samples %>%
+  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
+  group_by(year) %>%
+  count() %>%
+  ggplot(aes(x=year, y=n, fill=year))+
+  geom_col()
+```
+
+
+```{r}
+write_csv(total_data, "total_data.csv")
+```
+```{r}
+samples <- samples %>%
+  select(locality, latitude, longitude, observer_id, sampling_event_identifier, observation_type, duration_minutes, effort_distance_km, number_observers, observation_date) %>%
+  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
+  mutate(across(c("year", "month", "day"), as.factor))
+```
+
+```{r}
+write_csv(samples, "sample_data.csv")
+```
