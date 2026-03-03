@@ -1,0 +1,33 @@
+---
+title: "Josephine_WIP"
+author: "Josephine Wright"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+setwd("~/Desktop/BIS15L_W2026_Group-8/rbird")
+```
+
+Data
+```{r}
+sample_data <- read_csv("sample_data.csv") %>%
+  clean_names()
+```
+```{r}
+species_data <- read_csv("species_data.csv") %>%
+  clean_names()
+```
+```{r}
+total_data <- read_csv("total_data.csv") %>%
+  clean_names()
+```
