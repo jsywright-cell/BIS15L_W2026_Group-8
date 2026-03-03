@@ -31,3 +31,9 @@ species_data <- read_csv("species_data.csv") %>%
 total_data <- read_csv("total_data.csv") %>%
   clean_names()
 ```
+
+Removing data from total_data where the only information is sampling_event_identifier
+```{r}
+total_data <- total_data %>%
+  filter(!is.na(common_name))
+```
