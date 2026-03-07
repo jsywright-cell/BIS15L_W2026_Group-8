@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(janitor)
+library(RColorBrewer)
+library(ggplot2)
 ```
 
 ```{r}
@@ -37,3 +39,28 @@ Removing data from total_data where the only information is sampling_event_ident
 total_data <- total_data %>%
   filter(!is.na(common_name))
 ```
+
+Top five birds with most observations
+
+```{r}
+top_five <- total_data %>%
+  group_by(common_name) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  head(5)
+```
+
+
+plot with Dark2 color palette
+```{r}
+top_five %>% 
+  ggplot(aes(x = common_name, y = count)) +
+  geom_bar(stat = "identity") +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(title = "Top Five Birds with Most Observations",
+       x = "Common Name",
+       y = "Count of Observations") 
+ 
+```
+
+
