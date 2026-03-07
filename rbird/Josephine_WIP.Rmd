@@ -91,6 +91,106 @@ top_five <- total_data %>%
 top_five
 ```
 
+Yellow-rumped Warbler 2019 (to readjust battle)
+```{r}
+total_data %>% 
+  filter(year_y=="2019", common_name=="Yellow-rumped Warbler") %>%
+  count()
+```
+
+White-crowned Sparrow 2019 & 2019+2020 (to readjust battle)
+
+```{r}
+total_data %>% 
+  filter(year_y=="2019", common_name=="White-crowned Sparrow") %>%
+  count()
+```
+
+```{r}
+total_data %>% 
+  filter(year_y %in% c(2019, 2020), common_name=="White-crowned Sparrow") %>%
+  count()
+```
+
+Finding totals as years stack
+```{r}
+top_observations_19 <- total_data %>% 
+  filter(year_y=="2019") %>% 
+  group_by(common_name) %>% 
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  slice_head(n = 5)
+top_observations_19
+```
+
+```{r}
+top_observations_19 %>% 
+  ggplot(aes(x = common_name, y = count, fill = common_name)) +
+  geom_bar(stat = "identity") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Top Five Bird Observations in 2019",
+       x = "Common Name",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        legend.position = "none")
+```
+
+```{r}
+top_observations_19_20 <- total_data %>% 
+  filter(year_y %in% c(2019, 2020)) %>% 
+  group_by(common_name) %>% 
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  slice_head(n = 5)
+top_observations_19_20
+```
+```{r}
+top_observations_19_20 %>% 
+  ggplot(aes(x = common_name, y = count, fill = common_name)) +
+  geom_bar(stat = "identity") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Top Five Bird Observations in 2019 and 2020 Combined",
+       x = "Common Name",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        legend.position = "none")
+```
+
+```{r}
+top_observations_19_20_21 <- total_data %>% 
+  filter(year_y %in% c(2019, 2020, 2021)) %>% 
+  group_by(common_name) %>% 
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  slice_head(n = 5)
+top_observations_19_20_21
+```
+```{r}
+top_observations_19_20_21 %>% 
+  ggplot(aes(x = common_name, y = count, fill = common_name)) +
+  geom_bar(stat = "identity") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Top Five Bird Observations in 2019, 2020, and 2021 Combined",
+       x = "Common Name",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        legend.position = "none")
+```
+
+
+Top 5 observations in separate years
 ```{r}
 top_five %>%
   ggplot(aes(x = year_y, y = count, fill = common_name)) +
@@ -105,6 +205,14 @@ top_five %>%
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14))
 ```
+
+Shiny Questions - 
+
+**What is your favourite season? (Winter, Spring, Summer, Fall)
+**Do you prefer when people go the extra mile for you, would you rather meet them halfway, or do you like when others do all the work? (effort_distance_km_y >= 1, effort_distance_km<= 1, effort_distance_km == NA (or 0))
+**Do you prefer to be around a lot of people or do you like to keep to yourself? (number_observers_y >= 5)
+**Where is your favourite place to hang out in Davis? (different hotspots - not sure this will work though, need distinctly varying birds per hotspot)
+
 
 
 
