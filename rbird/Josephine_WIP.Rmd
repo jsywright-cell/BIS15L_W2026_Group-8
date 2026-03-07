@@ -14,6 +14,12 @@ library(tidyverse)
 library(janitor)
 library(RColorBrewer)
 library(ggplot2)
+library(paletteer)
+library(ggmap)
+library(patchwork)
+library(ggdensity)
+library(paletteer)
+library(RColorBrewer)
 ```
 
 ```{r}
@@ -36,31 +42,71 @@ total_data <- read_csv("total_data.csv") %>%
 
 Removing data from total_data where the only information is sampling_event_identifier
 ```{r}
-total_data <- total_data %>%
-  filter(!is.na(common_name))
+#total_data <- total_data %>%
+#  filter(!is.na(common_name))
 ```
 
-Top five birds with most observations
-
+How many bird species are represented by the data?
 ```{r}
-top_five <- total_data %>%
+total_data %>% 
+  distinct(common_name) %>% 
+  count()
+```
+
+Top five bird observations between 2019 and 2021 (total)
+```{r}
+top_five_total <- total_data %>%
+  filter(year_y %in% c(2019, 2020, 2021)) %>% 
   group_by(common_name) %>%
   summarise(count = n()) %>%
   arrange(desc(count)) %>%
-  head(5)
+  slice_head(n = 5)
+top_five_total
 ```
 
-
-plot with Dark2 color palette
 ```{r}
-top_five %>% 
-  ggplot(aes(x = common_name, y = count)) +
+top_five_total %>% 
+ggplot(aes(x = common_name, y = count, fill = common_name)) +
   geom_bar(stat = "identity") +
-  scale_fill_brewer(palette = "Dark2") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Dark2")+
   labs(title = "Top Five Birds with Most Observations",
        x = "Common Name",
-       y = "Count of Observations") 
- 
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        legend.position = "none")
 ```
+
+Top five birds with most observations per each year
+```{r}
+top_five <- total_data %>%
+  filter(year_y %in% c(2019, 2020, 2021)) %>% 
+  group_by(year_y, common_name) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  slice_head(n = 5)
+top_five
+```
+
+```{r}
+top_five %>%
+  ggplot(aes(x = year_y, y = count, fill = common_name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Top Five Birds with Most Observations",
+       x = "Year",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+```
+
+
+
 
 
