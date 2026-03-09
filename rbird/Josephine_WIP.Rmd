@@ -77,7 +77,8 @@ ggplot(aes(x = common_name, y = count, fill = common_name)) +
   theme(plot.title = element_text(size = 15),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14),
-        legend.position = "none")
+        legend.position = "none")+
+  scale_x_discrete(limits = top_five_total$common_name)
 ```
 
 Top five birds with most observations per each year
@@ -129,14 +130,15 @@ top_observations_19 %>%
   geom_bar(stat = "identity") +
   coord_flip()+
   scale_fill_brewer(palette = "Dark2")+
-  labs(title = "Top Five Bird Observations in 2019",
+  labs(title = "Top Bird Observations 2019",
        x = "Common Name",
        y = "Count of Observations",
        fill="Common Name") +
   theme(plot.title = element_text(size = 15),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14),
-        legend.position = "none")
+        legend.position = "none")+
+  scale_x_discrete(limits = top_observations_19$common_name)
 ```
 
 ```{r}
@@ -154,14 +156,15 @@ top_observations_19_20 %>%
   geom_bar(stat = "identity") +
   coord_flip()+
   scale_fill_brewer(palette = "Dark2")+
-  labs(title = "Top Five Bird Observations in 2019 and 2020 Combined",
+  labs(title = "Top Bird Observations 2019 & 2020",
        x = "Common Name",
        y = "Count of Observations",
        fill="Common Name") +
   theme(plot.title = element_text(size = 15),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14),
-        legend.position = "none")
+        legend.position = "none")+
+  scale_x_discrete(limits = top_observations_19_20$common_name)
 ```
 
 ```{r}
@@ -179,18 +182,19 @@ top_observations_19_20_21 %>%
   geom_bar(stat = "identity") +
   coord_flip()+
   scale_fill_brewer(palette = "Dark2")+
-  labs(title = "Top Five Bird Observations in 2019, 2020, and 2021 Combined",
+  labs(title = "Top Bird Observations 2019, 2020, & 2021 Combined",
        x = "Common Name",
        y = "Count of Observations",
        fill="Common Name") +
   theme(plot.title = element_text(size = 15),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14),
-        legend.position = "none")
+        legend.position = "none")+
+  scale_x_discrete(limits = top_observations_19_20_21$common_name)
 ```
 
 
-Top 5 observations in separate years
+Top 5 observations in separate years organized from least to most
 ```{r}
 top_five %>%
   ggplot(aes(x = year_y, y = count, fill = common_name)) +
@@ -205,6 +209,21 @@ top_five %>%
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14))
 ```
+
+Top 5 Birds By Season
+```{r}
+total_data <- total_data %>%
+  mutate(across(c("month_y"), as.numeric)) %>%
+  mutate(season = case_when(
+    month_y %in% c(12, 1, 2) ~ "Winter",
+    month_y %in% c(3, 4, 5) ~ "Spring",
+    month_y %in% c(6, 7, 8) ~ "Summer",
+    month_y %in% c(9, 10, 11) ~ "Fall",
+    TRUE ~ NA_character_)) %>% 
+  mutate(season = factor(season, levels = c("Winter", "Spring", "Summer", "Fall")))
+total_data
+```
+
 
 Shiny Questions - 
 
