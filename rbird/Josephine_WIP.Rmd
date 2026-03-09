@@ -15,11 +15,8 @@ library(janitor)
 library(RColorBrewer)
 library(ggplot2)
 library(paletteer)
-library(ggmap)
 library(patchwork)
-library(ggdensity)
-library(paletteer)
-library(RColorBrewer)
+library(naniar)
 ```
 
 ```{r}
@@ -46,12 +43,48 @@ Removing data from total_data where the only information is sampling_event_ident
 #  filter(!is.na(common_name))
 ```
 
+Adding season column
+```{r}
+total_data <- total_data %>%
+  mutate(across(c("month_y"), as.numeric)) %>%
+  mutate(season = case_when(
+    month_y %in% c(12, 1, 2) ~ "Winter",
+    month_y %in% c(3, 4, 5) ~ "Spring",
+    month_y %in% c(6, 7, 8) ~ "Summer",
+    month_y %in% c(9, 10, 11) ~ "Fall",
+    TRUE ~ NA_character_)) %>% 
+  mutate(season = factor(season, levels = c("Winter", "Spring", "Summer", "Fall")))
+total_data
+```
+
+**General Data Analyses Pertaining to Birds**
+
 How many bird species are represented by the data?
 ```{r}
 total_data %>% 
   distinct(common_name) %>% 
   count()
 ```
+
+How many birds were seen but unidentified?
+```{r}
+total_data %>% 
+  filter(is.na(common_name)) %>% 
+  count()
+```
+
+```{r}
+total_data %>% 
+  select(common_name) %>%
+  miss_var_summary()
+```
+How many birds total are represented by the data?
+```{r}
+total_data %>% 
+  count()
+```
+
+**Top Five Bird Observations**
 
 Top five bird observations between 2019 and 2021 (total)
 ```{r}
@@ -69,7 +102,7 @@ top_five_total %>%
 ggplot(aes(x = common_name, y = count, fill = common_name)) +
   geom_bar(stat = "identity") +
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top Five Birds with Most Observations",
        x = "Common Name",
        y = "Count of Observations",
@@ -129,7 +162,7 @@ top_observations_19 %>%
   ggplot(aes(x = common_name, y = count, fill = common_name)) +
   geom_bar(stat = "identity") +
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top Bird Observations 2019",
        x = "Common Name",
        y = "Count of Observations",
@@ -155,7 +188,7 @@ top_observations_19_20 %>%
   ggplot(aes(x = common_name, y = count, fill = common_name)) +
   geom_bar(stat = "identity") +
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top Bird Observations 2019 & 2020",
        x = "Common Name",
        y = "Count of Observations",
@@ -181,7 +214,7 @@ top_observations_19_20_21 %>%
   ggplot(aes(x = common_name, y = count, fill = common_name)) +
   geom_bar(stat = "identity") +
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top Bird Observations 2019, 2020, & 2021 Combined",
        x = "Common Name",
        y = "Count of Observations",
@@ -200,7 +233,7 @@ top_five %>%
   ggplot(aes(x = year_y, y = count, fill = common_name)) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top Five Birds with Most Observations",
        x = "Year",
        y = "Count of Observations",
@@ -211,27 +244,41 @@ top_five %>%
 ```
 
 Top 5 Birds By Season
+
 ```{r}
-total_data <- total_data %>%
-  mutate(across(c("month_y"), as.numeric)) %>%
-  mutate(season = case_when(
-    month_y %in% c(12, 1, 2) ~ "Winter",
-    month_y %in% c(3, 4, 5) ~ "Spring",
-    month_y %in% c(6, 7, 8) ~ "Summer",
-    month_y %in% c(9, 10, 11) ~ "Fall",
-    TRUE ~ NA_character_)) %>% 
-  mutate(season = factor(season, levels = c("Winter", "Spring", "Summer", "Fall")))
-total_data
+seasonal_birds <- total_data %>% 
+  filter(!is.na(common_name)) %>% 
+  group_by(season, common_name) %>% 
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  slice_head(n = 5)
+seasonal_birds
+```
+```{r}
+seasonal_birds %>%
+  ggplot(aes(x = season, y = count, fill = common_name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Set3")+
+  labs(title = "Top Five Birds with Most Observations by Season",
+       x = "Season",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))+
+  scale_x_discrete(limits = c("Winter", "Spring", "Summer", "Fall"))
 ```
 
+**Shiny App**
 
-Shiny Questions - 
+Questions - 
 
 **What is your favourite season? (Winter, Spring, Summer, Fall)
 **Do you prefer when people go the extra mile for you, would you rather meet them halfway, or do you like when others do all the work? (effort_distance_km_y >= 1, effort_distance_km<= 1, effort_distance_km == NA (or 0))
-**Do you prefer to be around a lot of people or do you like to keep to yourself? (number_observers_y >= 5)
+**Do you prefer to be around a lot of people or do you like to keep to yourself? (observation_count >= 5)
 **Where is your favourite place to hang out in Davis? (different hotspots - not sure this will work though, need distinctly varying birds per hotspot)
-
+**Do you like the spotlight or prefer to remain in the shadows? (number_observers_y >= 5)
 
 
 
