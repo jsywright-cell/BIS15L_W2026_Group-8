@@ -45,7 +45,7 @@ Removing data from total_data where the only information is sampling_event_ident
 
 Adding season column
 ```{r}
-total_data <- total_data %>%
+total_data_seasons <- total_data %>%
   mutate(across(c("month_y"), as.numeric)) %>%
   mutate(season = case_when(
     month_y %in% c(12, 1, 2) ~ "Winter",
@@ -54,7 +54,11 @@ total_data <- total_data %>%
     month_y %in% c(9, 10, 11) ~ "Fall",
     TRUE ~ NA_character_)) %>% 
   mutate(season = factor(season, levels = c("Winter", "Spring", "Summer", "Fall")))
-total_data
+total_data_seasons
+```
+
+```{r}
+write_csv(total_data_seasons, "total_data_seasons.csv")
 ```
 
 **General Data Analyses Pertaining to Birds**
@@ -246,7 +250,7 @@ top_five %>%
 Top 5 Birds By Season
 
 ```{r}
-seasonal_birds <- total_data %>% 
+seasonal_birds <- total_data_seasons %>% 
   filter(!is.na(common_name)) %>% 
   group_by(season, common_name) %>% 
   summarise(count = n()) %>%
@@ -279,6 +283,13 @@ Questions -
 **Do you prefer to be around a lot of people or do you like to keep to yourself? (observation_count >= 5)
 **Where is your favourite place to hang out in Davis? (different hotspots - not sure this will work though, need distinctly varying birds per hotspot)
 **Do you like the spotlight or prefer to remain in the shadows? (number_observers_y >= 5)
+
+**Shiny App pt 2**
+
+- select season
+- select year
+
+bar graph of most commonly observed bird in that season and year, with count
 
 
 
