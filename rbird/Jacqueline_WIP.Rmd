@@ -36,8 +36,8 @@ getwd()
 ```
 
 ```{r}
-species <- species %>%
-  filter(year!=2018 & year!= 2022 & year!=2023 & observation_count!="X")
+#species <- species %>%
+ # filter(year!=2018 & year!= 2022 & year!=2023 & observation_count!="X")
 ```
 
 ```{r}
@@ -52,8 +52,8 @@ species <- species %>%
 
 
 ```{r}
-species %>%
-  miss_var_summary()
+#species %>%
+#  miss_var_summary()
 ```
 
 
@@ -77,7 +77,7 @@ species %>%
 ```
 
 ```{r}
-glimpse(total_data)
+#glimpse(total_data)
 ```
 ```{r}
 #samples %>%
@@ -130,12 +130,8 @@ library(patchwork)
 library(ggdensity)
 library(paletteer)
 library(RColorBrewer)
+library(shiny)
 ```
-```{r}
-install.packages("devtools")
-devtools::install_github("thomasp85/patchwork")
-```
-
 
 ```{r}
 samples <- read_csv("sample_data.csv") %>% clean_names()
@@ -389,6 +385,81 @@ samples %>%
   scale_fill_brewer(palette = "Dark2")+
   labs(title = "Top 5 Birding Locations Yolo County", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
+```
+
+##Shiny App Map Portion
+
+```{r}
+seasons <- read_csv("total_data_seasons.csv")
+```
+```{r}
+ggmap(map_yolo) +
+  geom_density_2d_filled(data=samples, aes(longitude, latitude), size=1, alpha=0.5, bins=5)+
+  labs(title = "Density of Checklists for 2018-2023 in Yolo County", x="Longitude", y="Latitude")+
+  theme(
+    axis.title.x = element_text(vjust = -1), # Negative vjust moves it down/outward
+    axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
+  )
+```
+```{r}
+ggmap(map_yolo) +
+  geom_density_2d_filled(data=samples, aes(longitude, latitude), size=1, alpha=0.5, bins=5)+
+  labs(title = "Density of Checklists for 2018-2023 in Yolo County", x="Longitude", y="Latitude")+
+  theme(
+    axis.title.x = element_text(vjust = -1), # Negative vjust moves it down/outward
+    axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
+  )
+```
+
+
+
+```{r}
+
+ui <- fluidPage(
+  
+  
+  
+  
+  
+  radioButtons("x",
+               "Select Map",
+               choices=c("_yolo",
+                         "_davis"),
+               selected="_yolo"),
+  
+  plotOutput("map")
+)
+
+
+
+
+server <- function(input, output, session) {
+
+  
+  
+    output$map <- renderPlot({
+    
+      ggmap(map(input$x)) +
+  geom_density_2d_filled(data=samples, aes(longitude, latitude), size=1, alpha=0.5, bins=5)+
+  labs(title = "Density of Checklists for 2018-2023 in Yolo County", x="Longitude", y="Latitude")+
+  theme(
+    axis.title.x = element_text(vjust = -1), # Negative vjust moves it down/outward
+    axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
+  )
+      
+      
+    
+  })
+  
+  
+  
+}
+
+
+
+
+
+shinyApp(ui, server)
 ```
 
 
