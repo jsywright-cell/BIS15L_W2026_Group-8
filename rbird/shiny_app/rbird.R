@@ -1,13 +1,9 @@
-
-
 library(shiny)
 library(paletteer)
 library(shinydashboard)
 library(tidyverse)
 library(ggmap)
 library(ggdensity)
-
-
 
 #setwd("~/Desktop/BIS15L_W2026_Group-8/rbird")
 total_seasons_data <- read_csv("total_data_seasons.csv")
@@ -28,7 +24,9 @@ map_davis <- get_stadiamap(bbox_davis, maptype = "stamen_terrain", zoom = 14)
 
 ui <- dashboardPage(
   
-  dashboardHeader(title = "Top 5 Birds by Season and Year", titleWidth = 500),
+  dashboardHeader(title = span(
+    img(src = "bird.jpg", height = 35), 
+    "Bird Exploration")),
   
   dashboardSidebar(
     
