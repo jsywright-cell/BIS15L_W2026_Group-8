@@ -281,9 +281,21 @@ season_obs_w %>%
   ggplot(aes(x=reorder(locality, spring), y=spring, fill=locality))+
   geom_col()+
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top 5 Birding Locations in Spring", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
+```
+```{r}
+samples %>%
+  filter(latitude>=38.525
+         & latitude<=38.575 
+         & longitude<=-121.678 
+         & longitude>=-121.792) %>%
+  summarise(total = n())
+```
+```{r}
+samples %>%
+  count()
 ```
 
 ```{r}
@@ -293,7 +305,7 @@ season_obs_w %>%
   ggplot(aes(x=reorder(locality, summer), y=summer, fill=locality))+
   geom_col()+
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top 5 Birding Locations in Summer", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
@@ -305,7 +317,7 @@ season_obs_w %>%
   ggplot(aes(x=reorder(locality, fall), y=fall, fill=locality))+
   geom_col()+
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top 5 Birding Locations in Fall", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
@@ -317,7 +329,7 @@ season_obs_w %>%
   ggplot(aes(x=reorder(locality, winter), y=winter, fill=locality))+
   geom_col()+
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top 5 Birding Locations in Winter", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
@@ -327,7 +339,7 @@ season_observed %>%
   mutate(across(c("year"), as.factor)) %>%
   ggplot(aes(x=season, fill=year))+
   geom_bar(position = "dodge")+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Checklist Count Per Year By Season for Yolo County", x="Season", y="Checklist Count", fill="Year")
 ```
 
@@ -345,7 +357,7 @@ samples %>%
   ggplot(aes(x= reorder(locality,n), y=n, fill=locality))+
   geom_col()+
   coord_flip()+
-  scale_fill_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Set3")+
   labs(title = "Top 5 Birding Locations Yolo County", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
@@ -362,8 +374,9 @@ samples %>%
   group_by(year) %>%
   ggplot(aes(x=year, fill=year))+
   geom_bar()+
-  scale_fill_brewer(palette = "Dark2")+
-  labs(title = "Amount of Checklists per Year from 2018-2023", x="Year", y= "Number of Checklists", fill="Year")
+  scale_fill_brewer(palette = "Set3")+
+  labs(title = "Amount of Checklists per Year from 2018-2023", x="Year", y= "Number of Checklists", fill="Year")+
+  geom_text(aes(label = after_stat(count)), stat = "count", vjust = -0.5, size = 3.5)
 ```
 
 
@@ -377,6 +390,12 @@ samples %>%
   scale_color_brewer(palette = "Dark2")+
   labs(title = "Amount of Checklists per Month from 2018-2023", x="Month", y= "Number of Checklists", color="Year")
 ```
+
+```{r}
+
+```
+
+
 ## Are more people sitting or traveling?
 
 ```{r}
@@ -415,6 +434,20 @@ species %>%
   count()
 ```
 ```{r}
+species %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(year) %>%
+  distinct(common_name) %>%
+  count() %>%
+  ggplot(aes(x=year, y=n, fill = year))+
+  geom_col()+
+  scale_fill_brewer(palette = "Set3")+
+  labs(title = "Number of Distinct Species Seen by Year", x="Year", y= "Number of Species", fill="Year")+
+  geom_text(aes(label = n), vjust = 1.5, size = 3.5)
+```
+
+
+```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
   group_by(year) %>%
@@ -428,24 +461,40 @@ species %>%
 ```
 ```{r}
 species %>%
-  group_by(common_name) %>%
+  group_by(year) %>%
   count() %>%
   arrange(desc(n))
 ```
+```{r}
+species %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(year) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  ggplot(aes(x=year, y=n, fill=year))+
+  geom_col()+
+  labs(title = "Number of Total Birds Seen by Year", x="Year", y= "Number of Birds", fill="Year")+
+  geom_text(aes(label = n), vjust = 1.5, size = 3.5)+
+  scale_fill_brewer(palette = "Set3")
+```
+
 
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
   drop_na(duration_minutes) %>%
   ggplot(aes(x=year, y=log10(duration_minutes), fill=year))+
-  geom_boxplot()
+  geom_boxplot()+
+  scale_fill_brewer(palette = "Set3")
 ```
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
+  filter(year==2018 | year==2020 | year==2023) %>%
   drop_na(duration_minutes) %>%
   ggplot(aes(x=log10(duration_minutes), fill=year))+
-  geom_density(alpha=0.3)
+  geom_density(alpha=0.3)+
+  scale_fill_brewer(palette = "Set3")
 ```
 
 ```{r}
@@ -453,23 +502,28 @@ samples %>%
   mutate(across(c("year"), as.factor)) %>%
   drop_na(effort_distance_km) %>%
   ggplot(aes(x=year, y=log10(effort_distance_km), fill=year, na.rm=T))+
-  geom_boxplot()
+  geom_boxplot()+
+  scale_fill_brewer(palette = "Set3")
 ```
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
+  filter(year==2018 | year==2020 | year==2023) %>%
   drop_na(effort_distance_km) %>%
   ggplot(aes(x=log10(effort_distance_km), fill=year, na.rm=T))+
-  geom_density(alpha=0.3)
+  geom_density(alpha=0.3)+
+  scale_fill_brewer(palette = "Set3")
 ```
 
 ```{r}
 samples %>%
-  filter(observation_type=="Traveling") %>%
+  mutate(across(c("year"), as.factor)) %>%
+  filter(observation_type=="Traveling" & (year==2018 | year==2020 | year==2023)) %>%
   drop_na(effort_distance_km, duration_minutes)%>%
-  ggplot(aes(x=log10(effort_distance_km), y=log10(duration_minutes)))+
-  geom_point()+
-  geom_smooth(method=lm)
+  ggplot(aes(x=log10(effort_distance_km), y=log10(duration_minutes), color=year))+
+  geom_point(size=0.5)+
+  geom_smooth(method=lm, se = F)+
+  scale_color_brewer(palette = "Dark2")
 ```
 
 ```{r}
@@ -479,8 +533,8 @@ obs_total <- species %>%
 ```
 ```{r}
 dur <- species %>%
-  select(duration_minutes, sampling_event_identifier)%>%
-  distinct(sampling_event_identifier, duration_minutes)
+  select(duration_minutes, sampling_event_identifier, year)%>%
+  distinct(sampling_event_identifier, duration_minutes, year)
 ```
 ```{r}
 dur_vs_obs <- full_join(obs_total, dur, by="sampling_event_identifier")
@@ -488,15 +542,17 @@ dur_vs_obs <- full_join(obs_total, dur, by="sampling_event_identifier")
 
 ```{r}
 dur_vs_obs %>%
+  mutate(across(c("year"), as.factor)) %>%
   drop_na(observation_count_total, duration_minutes) %>%
-  ggplot(aes(x=log10(duration_minutes), y=log10(observation_count_total)))+
-  geom_point()+
-  geom_smooth(method=lm)
+  ggplot(aes(x=log10(duration_minutes), y=log10(observation_count_total), color=year))+
+  geom_point(size=0.1)+
+  geom_smooth(method=lm, se=F)+
+  scale_color_brewer(palette = "Dark2")
 ```
 ```{r}
 effort <- species %>%
-  select(effort_distance_km, sampling_event_identifier)%>%
-  distinct(sampling_event_identifier, effort_distance_km)
+  select(effort_distance_km, sampling_event_identifier, year)%>%
+  distinct(sampling_event_identifier, effort_distance_km, year)
 ```
 
 ```{r}
@@ -505,16 +561,18 @@ effort_obs <- full_join(effort, obs_total, by="sampling_event_identifier")
 
 ```{r}
 effort_obs %>%
+  mutate(across(c("year"), as.factor)) %>%
   drop_na(observation_count_total,effort_distance_km) %>%
-  ggplot(aes(x=log10(effort_distance_km), y=log10(observation_count_total)))+
-  geom_point()+
-  geom_smooth(method=lm)
+  ggplot(aes(x=log10(effort_distance_km), y=log10(observation_count_total), color=year))+
+  geom_point(size=0.5)+
+  geom_smooth(method=lm, se=F)+
+  scale_color_brewer(palette = "Dark2")
 ```
 
 ```{r}
 people <- species %>%
-  select(number_observers, sampling_event_identifier)%>%
-  distinct(sampling_event_identifier, number_observers)
+  select(number_observers, sampling_event_identifier, year)%>%
+  distinct(sampling_event_identifier, number_observers, year)
 ```
 
 ```{r}
@@ -523,25 +581,14 @@ people_obs <- full_join(people, obs_total, by="sampling_event_identifier")
 
 ```{r}
 people_obs %>%
+  mutate(across(c("year"), as.factor)) %>%
   filter(sampling_event_identifier!="S93953515") %>%
   drop_na(number_observers) %>%
-  ggplot(aes(x=number_observers, y=log10(observation_count_total)))+
-  geom_point()
+  ggplot(aes(x=number_observers, y=log10(observation_count_total), color=year))+
+  geom_point(size=1)+
+  geom_smooth(method=lm, se=F)+
+  scale_color_brewer(palette = "Dark2")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ##Shiny App Map Portion
@@ -647,6 +694,40 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
+
+```{r}
+samples_time <- read.delim("ebd_US-CA-113_201801_202312_smp_relJan-2026_sampling.txt", quote = "", na="") %>% clean_names()
+```
+
+```{r}
+samples_time <- samples_time %>%
+  select(locality, latitude, longitude, observer_id, sampling_event_identifier, observation_type, duration_minutes, effort_distance_km, number_observers, observation_date, time_observations_started) %>%
+  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
+  separate(time_observations_started, into = c("hour", "minute", "sec"), sep = ":") %>%
+  mutate(across(c("year", "month", "day"), as.factor))
+```
+
+```{r}
+samples_time %>%
+  drop_na(hour) %>%
+  filter(year==2018 | year==2020 | year==2023) %>%
+  group_by(hour, year, month) %>%
+  count() %>%
+  ggplot(aes(x=hour, y=n, group = year, color=year))+
+  geom_line()+
+  facet_wrap(~month)
+```
+```{r}
+samples_time %>%
+  drop_na(hour)  %>%
+  group_by(hour, month) %>%
+  count() %>%
+  ggplot(aes(x=hour, y=n, group = month, color=month))+
+  geom_line()
+```
+
+
+
 
 
 
