@@ -261,19 +261,68 @@ seasonal_birds
 ```
 ```{r}
 seasonal_birds %>%
+  filter(season=="Winter") %>% 
   ggplot(aes(x = season, y = count, fill = common_name)) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip()+
   scale_fill_brewer(palette = "Set3")+
-  labs(title = "Top Five Birds with Most Observations by Season",
+  labs(title = "Top Five Birds with Most Observations in Winter",
        x = "Season",
        y = "Count of Observations",
        fill="Common Name") +
   theme(plot.title = element_text(size = 15),
         axis.title.x = element_text(size = 14),
-        axis.title.y = element_text(size = 14))+
-  scale_x_discrete(limits = c("Winter", "Spring", "Summer", "Fall"))
+        axis.title.y = element_text(size = 14))
 ```
+
+```{r}
+seasonal_birds %>%
+  filter(season=="Spring") %>% 
+  ggplot(aes(x = season, y = count, fill = common_name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Set3")+
+  labs(title = "Top Five Birds with Most Observations in Spring",
+       x = "Season",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+```
+
+```{r}
+seasonal_birds %>%
+  filter(season=="Summer") %>% 
+  ggplot(aes(x = season, y = count, fill = common_name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Set3")+
+  labs(title = "Top Five Birds with Most Observations in Summer",
+       x = "Season",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+```
+
+```{r}
+seasonal_birds %>%
+  filter(season=="Fall") %>% 
+  ggplot(aes(x = season, y = count, fill = common_name)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  scale_fill_brewer(palette = "Set3")+
+  labs(title = "Top Five Birds with Most Observations in Fall",
+       x = "Season",
+       y = "Count of Observations",
+       fill="Common Name") +
+  theme(plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+```
+
 
 **Shiny App**
 
