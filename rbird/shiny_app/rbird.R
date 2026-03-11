@@ -22,11 +22,17 @@ long_davis <- c(-121.678, -121.792)
 bbox_davis <- make_bbox(long_davis, lat_davis, f=0.03)
 map_davis <- get_stadiamap(bbox_davis, maptype = "stamen_terrain", zoom = 14)
 
-ui <- dashboardPage(
+ui <- tagList(
+
+  tags$div(
+    style = "text-align:center; margin-bottom:20px;",
+    tags$img(src = "birds2.png", height = "100%", width= "100%")
+    ),
   
-  dashboardHeader(title = span(
-    img(src = "bird.jpg", height = 35), 
-    "Bird Exploration")),
+dashboardPage(
+  
+  dashboardHeader(title = 
+    "Explore Bird Observations"),
   
   dashboardSidebar(
     
@@ -90,7 +96,8 @@ ui <- dashboardPage(
    ) #closes tabItems
     
 ) #closes dashboardBody
-) #closes fluidPage
+) #closes dashboardPage
+) #closes tagList
 
 
 server <- function(input, output, session) {
@@ -131,7 +138,7 @@ server <- function(input, output, session) {
     dynamic_title <- paste("Density of Checklists in", input$y, "of", input$x)
     
     filtered_selection <- total_seasons_data %>%
-      filter(year_y == as.numeric(input$x) & season == input$y)
+      filter(year_y == as.nuneric(input$x) & season == input$y)
     
     ggmap(map_davis) +
       geom_density_2d_filled(data = filtered_selection, aes(longitude_y, latitude_y), size = 1, alpha = 0.5) +
