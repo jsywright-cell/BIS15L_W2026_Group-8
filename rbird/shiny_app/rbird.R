@@ -138,7 +138,7 @@ server <- function(input, output, session) {
     dynamic_title <- paste("Density of Checklists in", input$y, "of", input$x)
     
     filtered_selection <- total_seasons_data %>%
-      filter(year_y == as.nuneric(input$x) & season == input$y)
+      filter(year_y == as.numeric(input$x) & season == input$y)
     
     ggmap(map_davis) +
       geom_density_2d_filled(data = filtered_selection, aes(longitude_y, latitude_y), size = 1, alpha = 0.5) +

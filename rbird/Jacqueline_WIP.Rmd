@@ -244,18 +244,6 @@ season_observed <- samples %>%
 ```
 
 ```{r}
-season_observed_some <- samples %>%
-  filter(year==2018 | year==2020 | year==2023) %>%
-  mutate(across(c("month"), as.numeric)) %>%
-  mutate(season=case_when(month>=3 & month<6 ~ "spring",
-                            month>=6 & month<9  ~"summer",
-                            month>=9 & month<12 ~ "fall",
-                            month>=12 | month<3  ~ "winter")) %>%
-  mutate(season=factor(season,
-                                 levels=c("spring", "summer", "fall", "winter")))
-```
-
-```{r}
 season_observed %>%
   filter(season=="spring")%>%
   group_by(locality) %>%
@@ -717,6 +705,7 @@ samples_time %>%
   geom_line()+
   facet_wrap(~month)
 ```
+
 ```{r}
 samples_time %>%
   drop_na(hour)  %>%
