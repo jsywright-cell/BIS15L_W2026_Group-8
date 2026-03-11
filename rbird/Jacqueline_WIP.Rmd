@@ -12,10 +12,18 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
 library(naniar)
+library(ggmap)
+library(leaflet)
+library(patchwork)
+library(ggdensity)
+library(paletteer)
+library(RColorBrewer)
 ```
+
 ```{r}
 getwd()
 ```
+## Prepping the data: Reading into R, establishing NA's, selecting for relevent information, and writing a new file.
 
 ```{r}
 #species <- read.delim("ebd_US-CA-113_201801_202312_smp_relJan-2026.txt", quote = "", na="") %>% clean_names()
@@ -25,6 +33,7 @@ getwd()
 #species <- species %>%
 #  select(taxonomic_order, common_name, scientific_name, observation_count, locality, latitude, longitude, observation_date, observer_id, sampling_event_identifier, observation_type, duration_minutes, effort_distance_km, number_observers)
 ```
+
 ```{r}
 #species <- species %>%
 #  separate(observation_date, into = c("year", "month", "day"), sep = "-")
@@ -36,13 +45,8 @@ getwd()
 ```
 
 ```{r}
-species <- species %>%
-  filter(year!=2018 & year!= 2022 & year!=2023 & observation_count!="X")
-```
-
-```{r}
 #species <- species %>%
- #filter(observation_type!="Historical" & observation_type!="Incidental" & observation_type!="Nocturnal Flight Call Count" & observation_type!="Banding")
+# filter(observation_type!="Historical" & observation_type!="Incidental" & observation_type!="Nocturnal Flight Call Count" & observation_type!="Banding")
 ```
 
 ```{r}
@@ -50,18 +54,9 @@ species <- species %>%
 #  mutate(observation_count=na_if(observation_count, "X"))
 ```
 
-
-```{r}
-species %>%
-  miss_var_summary()
-```
-
-
-
 ```{r}
 #write_csv(species, "species_data.csv")
 ```
-
 
 ```{r}
 #samples <- read.delim("ebd_US-CA-113_201801_202312_smp_relJan-2026_sampling.txt", quote = "", na="") %>% clean_names()
@@ -77,30 +72,8 @@ species %>%
 ```
 
 ```{r}
-glimpse(total_data)
+#glimpse(total_data)
 ```
-```{r}
-#samples %>%
-#  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
-#  ggplot(aes(x=month, fill=year))+
-#  geom_bar(position="dodge")
-```
-```{r}
-#samples %>%
-#  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
-#  filter(year=="2020") %>%
-#  ggplot(aes(x=month, fill=year))+
-#  geom_bar(position="dodge")
-```
-```{r}
-#samples %>%
-#  separate(observation_date, into = c("year", "month", "day"), sep = "-") %>%
-#  group_by(year) %>%
-#  count() %>%
-#  ggplot(aes(x=year, y=n, fill=year))+
- # geom_col()
-```
-
 
 ```{r}
 #write_csv(total_data, "total_data.csv")
@@ -113,48 +86,33 @@ glimpse(total_data)
 ```
 
 ```{r}
+#samples <- samples %>%
+#  mutate(across(c("year", "month", "day", "observation_type"), as.factor)) %>%
+#  filter(observation_type!="Historical" & observation_type!="Incidental" & observation_type!="Nocturnal Flight Call Count" & observation_type!="Banding")
+```
+
+```{r}
 #write_csv(samples, "sample_data.csv")
 ```
-
-```{r}
-
-```
-
-
-```{r message=FALSE, warning=FALSE}
-#install.packages("ggmap")
-library(ggmap)
-#install.packages("leaflet")
-library(leaflet)
-library(patchwork)
-library(ggdensity)
-library(paletteer)
-library(RColorBrewer)
-```
-```{r}
-install.packages("devtools")
-devtools::install_github("thomasp85/patchwork")
-```
-
 
 ```{r}
 samples <- read_csv("sample_data.csv") %>% clean_names()
 species <- read_csv("species_data.csv") %>% clean_names()
 total_data <- read_csv("total_data.csv") %>% clean_names()
 ```
+
+## Registering and creating the maps.
+
 ```{r}
 register_stadiamaps("c7554538-a17b-488f-9eb4-62494d62e9e5", write = FALSE)
 ```
+
+#Creating the Yolo County map:
 
 ```{r}
 samples %>%
   select(latitude, longitude) %>%
   summary()
-```
-```{r}
-lat_davis <- c(38.525, 38.575)
-long_davis <- c(-121.678, -121.792)
-bbox_davis <- make_bbox(long_davis, lat_davis, f=0.03)
 ```
 
 ```{r}
@@ -166,6 +124,7 @@ bbox_yolo <- make_bbox(long_yolo, lat_yolo, f=0.03)
 ```{r}
 map_yolo <- get_stadiamap(bbox_yolo, maptype = "stamen_terrain", zoom = 11)
 ```
+
 ```{r}
 ggmap(map_yolo)+
   labs(title = "Yolo County", x="Longitude", y="Latitude")+
@@ -184,6 +143,7 @@ ggmap(map_yolo) +
     axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
   )
 ```
+
 ```{r}
 ggmap(map_yolo) +
   geom_density_2d_filled(data=samples, aes(longitude, latitude), size=1, alpha=0.5, bins=5)+
@@ -193,7 +153,28 @@ ggmap(map_yolo) +
     axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
   )
 ```
+```{r}
+dens_check <- samples %>%
+  filter(year==2018 | year==2020 | year==2023)
+```
 
+```{r}
+ggmap(map_yolo) +
+  geom_density_2d_filled(data=dens_check, aes(longitude, latitude), size=1, alpha=0.5)+
+  labs(title = "Density of Checklists for 2018, 2020, and 2023 in Yolo", x="Longitude", y="Latitude")+
+  theme(axis.title.x = element_text(vjust = -1),
+        axis.title.y = element_text(vjust = 2),
+        axis.text.x=element_text(angle=60, hjust = 1))+
+  facet_wrap(~ year)
+```
+
+#Creating the Davis map:
+
+```{r}
+lat_davis <- c(38.525, 38.575)
+long_davis <- c(-121.678, -121.792)
+bbox_davis <- make_bbox(long_davis, lat_davis, f=0.03)
+```
 
 ```{r}
 map_davis <- get_stadiamap(bbox_davis, maptype = "stamen_terrain", zoom = 14)
@@ -202,16 +183,6 @@ map_davis <- get_stadiamap(bbox_davis, maptype = "stamen_terrain", zoom = 14)
 ```{r}
 ggmap(map_davis)
 ```
-```{r}
-samples <- samples %>%
-  mutate(across(c("year", "month", "day", "observation_type"), as.factor)) %>%
-  filter(observation_type!="Historical" & observation_type!="Incidental" & observation_type!="Nocturnal Flight Call Count" & observation_type!="Banding")
-```
-
-```{r}
-#write_csv(samples, "sample_data.csv")
-```
-
 
 ```{r}
 ggmap(map_davis) +
@@ -221,26 +192,11 @@ ggmap(map_davis) +
   scale_color_brewer(palette = "Dark2")
 ```
 
-
-
-```{r}
-ggmap(map_davis) +
-  geom_point(data=samples, aes(longitude, latitude, color=year), size=0.75, alpha=0.8)+
-  labs(x="Longitude", y="Latitude", title = "CA Usofila Records")+
-  facet_wrap(~ year, nrow = 2)
-```
-
-
 ```{r}
 ggmap(map_davis) +
   geom_density_2d_filled(data=samples, aes(longitude, latitude), size=1, alpha=0.5)+
   labs(title = "Density of Checklists for 2018-2023 in Davis", x="Longitude", y="Latitude")+
   theme(axis.title.x = element_text(vjust = -1), axis.title.y = element_text(vjust = 2))
-```
-
-```{r}
-dens_check <- samples %>%
-  filter(year==2018 | year==2020 | year==2023)
 ```
 
 ```{r}
@@ -252,15 +208,9 @@ ggmap(map_davis) +
         axis.text.x=element_text(angle=60, hjust = 1))+
   facet_wrap(~ year)
 ```
-```{r}
-ggmap(map_yolo) +
-  geom_density_2d_filled(data=dens_check, aes(longitude, latitude), size=1, alpha=0.5)+
-  labs(title = "Density of Checklists for 2018, 2020, and 2023 in Yolo", x="Longitude", y="Latitude")+
-  theme(axis.title.x = element_text(vjust = -1),
-        axis.title.y = element_text(vjust = 2),
-        axis.text.x=element_text(angle=60, hjust = 1))+
-  facet_wrap(~ year)
-```
+
+##Prepping the seasonal data
+
 
 ```{r}
 season_observed <- samples %>%
@@ -274,25 +224,6 @@ season_observed <- samples %>%
 ```
 
 ```{r}
-season_observed %>%
-  ggplot(aes(x=season, fill=year))+
-  geom_bar(position="dodge")+
-  scale_fill_brewer(palette = "Dark2")+
-  labs(title = "Checklist Count Per Year By Season for Yolo County", x="Season", y="Number of Checklists", fill="Year")+
-  theme(axis.title.y = element_text(vjust = 3))
-  
-```
-
-
-```{r}
-ggmap(map_yolo) +
-  geom_point(data=season_observed, aes(longitude, latitude, color=season), size=0.9, alpha=0.8)+
-    labs(title = "Checklist Locations for 2018-2023 for Davis", x="Longitude", y="Latitude")+
-  theme(axis.title.x = element_text(vjust = -1), axis.title.y = element_text(vjust = 2))+
-  facet_wrap(year~ season, nrow=3)+
-  scale_color_brewer(palette = "Dark2")
-```
-```{r}
 season_observed_some <- samples %>%
   filter(year==2018 | year==2020 | year==2023) %>%
   mutate(across(c("month"), as.numeric)) %>%
@@ -305,19 +236,12 @@ season_observed_some <- samples %>%
 ```
 
 ```{r}
-ggmap(map_yolo) +
-  geom_point(data=season_observed_some, aes(longitude, latitude, color=season), size=0.9, alpha=0.8)+
-    labs(title = "Checklist Locations for 2018-2023 for Davis", x="Longitude", y="Latitude")+
-  theme(axis.title.x = element_text(vjust = -1), axis.title.y = element_text(vjust = 2))+
-  facet_wrap(~season, nrow=3)+
-  scale_color_brewer(palette = "Dark2")
-```
-```{r}
 season_observed %>%
   filter(season=="spring")%>%
   group_by(locality) %>%
   count(sort=T)
 ```
+
 ```{r}
 season_observed_local <- season_observed %>%
   select(locality, season)
@@ -341,6 +265,7 @@ season_obs_w %>%
   labs(title = "Top 5 Birding Locations in Spring", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
+
 ```{r}
 season_obs_w %>%
   arrange(desc(summer)) %>%
@@ -352,6 +277,7 @@ season_obs_w %>%
   labs(title = "Top 5 Birding Locations in Summer", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
+
 ```{r}
 season_obs_w %>%
   arrange(desc(fall)) %>%
@@ -363,6 +289,7 @@ season_obs_w %>%
   labs(title = "Top 5 Birding Locations in Fall", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
+
 ```{r}
 season_obs_w %>%
   arrange(desc(winter)) %>%
@@ -376,9 +303,21 @@ season_obs_w %>%
 ```
 
 ```{r}
+season_observed %>%
+  mutate(across(c("year"), as.factor)) %>%
+  ggplot(aes(x=season, fill=year))+
+  geom_bar(position = "dodge")+
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Checklist Count Per Year By Season for Yolo County", x="Season", y="Checklist Count", fill="Year")
+```
+
+## Top 5 Birding Locations in Yolo County
+
+```{r}
 samples %>%
   count(locality, sort=T)
 ```
+
 ```{r}
 samples %>%
   count(locality, sort=T) %>%
@@ -390,6 +329,200 @@ samples %>%
   labs(title = "Top 5 Birding Locations Yolo County", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
+## Checklist Counts Per Year in Yolo County
+
+```{r}
+samples %>%
+  group_by(year) %>%
+  count() 
+```
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(year) %>%
+  ggplot(aes(x=year, fill=year))+
+  geom_bar()+
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Amount of Checklists per Year from 2018-2023", x="Year", y= "Number of Checklists", fill="Year")
+```
+
+
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor))%>%
+  group_by(year, month) %>%
+  count() %>%
+  ggplot(aes(x=month, y=n, group = year, color=year))+
+  geom_line()+
+  scale_color_brewer(palette = "Dark2")+
+  labs(title = "Amount of Checklists per Month from 2018-2023", x="Month", y= "Number of Checklists", color="Year")
+```
+## Are more people sitting or traveling?
+
+```{r}
+samples %>%
+  group_by(observation_type) %>%
+  count(sort=T)
+```
+
+```{r}
+season_observed %>%
+  filter(observation_type!="Area") %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(season, observation_type, year) %>%
+  count() %>%
+  ggplot(aes(x=year, y=n, fill=year))+
+  geom_col()+
+  facet_wrap(season ~ observation_type, nrow=2)
+```
+
+```{r}
+samples %>%
+  filter(observation_type!="Area") %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(observation_type, year) %>%
+  count() %>%
+  ggplot(aes(x=observation_type, y=n, fill=observation_type))+
+  geom_col()+
+  facet_wrap(~ year, nrow=2)
+```
+##
+
+```{r}
+species %>%
+  group_by(year) %>%
+  distinct(common_name) %>%
+  count()
+```
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(year) %>%
+  count()
+```
+
+```{r}
+species %>%
+  distinct(common_name) %>%
+  count()
+```
+```{r}
+species %>%
+  group_by(common_name) %>%
+  count() %>%
+  arrange(desc(n))
+```
+
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  drop_na(duration_minutes) %>%
+  ggplot(aes(x=year, y=log10(duration_minutes), fill=year))+
+  geom_boxplot()
+```
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  drop_na(duration_minutes) %>%
+  ggplot(aes(x=log10(duration_minutes), fill=year))+
+  geom_density(alpha=0.3)
+```
+
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  drop_na(effort_distance_km) %>%
+  ggplot(aes(x=year, y=log10(effort_distance_km), fill=year, na.rm=T))+
+  geom_boxplot()
+```
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  drop_na(effort_distance_km) %>%
+  ggplot(aes(x=log10(effort_distance_km), fill=year, na.rm=T))+
+  geom_density(alpha=0.3)
+```
+
+```{r}
+samples %>%
+  filter(observation_type=="Traveling") %>%
+  drop_na(effort_distance_km, duration_minutes)%>%
+  ggplot(aes(x=log10(effort_distance_km), y=log10(duration_minutes)))+
+  geom_point()+
+  geom_smooth(method=lm)
+```
+
+```{r}
+obs_total <- species %>%
+  group_by(sampling_event_identifier) %>%
+  summarise(observation_count_total=sum(observation_count))
+```
+```{r}
+dur <- species %>%
+  select(duration_minutes, sampling_event_identifier)%>%
+  distinct(sampling_event_identifier, duration_minutes)
+```
+```{r}
+dur_vs_obs <- full_join(obs_total, dur, by="sampling_event_identifier")
+```
+
+```{r}
+dur_vs_obs %>%
+  drop_na(observation_count_total, duration_minutes) %>%
+  ggplot(aes(x=log10(duration_minutes), y=log10(observation_count_total)))+
+  geom_point()+
+  geom_smooth(method=lm)
+```
+```{r}
+effort <- species %>%
+  select(effort_distance_km, sampling_event_identifier)%>%
+  distinct(sampling_event_identifier, effort_distance_km)
+```
+
+```{r}
+effort_obs <- full_join(effort, obs_total, by="sampling_event_identifier")
+```
+
+```{r}
+effort_obs %>%
+  drop_na(observation_count_total,effort_distance_km) %>%
+  ggplot(aes(x=log10(effort_distance_km), y=log10(observation_count_total)))+
+  geom_point()+
+  geom_smooth(method=lm)
+```
+
+```{r}
+people <- species %>%
+  select(number_observers, sampling_event_identifier)%>%
+  distinct(sampling_event_identifier, number_observers)
+```
+
+```{r}
+people_obs <- full_join(people, obs_total, by="sampling_event_identifier")
+```
+
+```{r}
+people_obs %>%
+  filter(sampling_event_identifier!="S93953515") %>%
+  drop_na(number_observers) %>%
+  ggplot(aes(x=number_observers, y=log10(observation_count_total)))+
+  geom_point()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
