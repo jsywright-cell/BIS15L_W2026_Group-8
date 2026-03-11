@@ -46,12 +46,22 @@ getwd()
 
 ```{r}
 #species <- species %>%
+ # filter(year!=2018 & year!= 2022 & year!=2023 & observation_count!="X")
+```
+
+```{r}
+#species <- species %>%
 # filter(observation_type!="Historical" & observation_type!="Incidental" & observation_type!="Nocturnal Flight Call Count" & observation_type!="Banding")
 ```
 
 ```{r}
 #species <- species %>%
 #  mutate(observation_count=na_if(observation_count, "X"))
+```
+
+```{r}
+#species %>%
+#  miss_var_summary()
 ```
 
 ```{r}
@@ -93,6 +103,16 @@ getwd()
 
 ```{r}
 #write_csv(samples, "sample_data.csv")
+```
+
+```{r message=FALSE, warning=FALSE}
+library(ggmap)
+#library(patchwork)
+library(ggdensity)
+#library(paletteer)
+library(RColorBrewer)
+library(shiny)
+library(shinydashboard)
 ```
 
 ```{r}
@@ -523,6 +543,110 @@ people_obs %>%
 
 
 
+
+##Shiny App Map Portion
+
+```{r}
+seasons <- read_csv("total_data_seasons.csv")
+```
+```{r}
+seasons <- seasons %>%
+       mutate(across(c("year_y", "season"), as.factor))
+```
+
+```{r}
+
+ui <- dashboardPage(
+  
+  dashboardHeader(title="Map of Yolo County and Davis by Season and Year", titleWidth = 500),
+  
+  dashboardSidebar(disable=T),
+  
+  dashboardBody(
+  
+  selectInput("x",
+               "Select Year",
+               choices=c("2018",
+                         "2019",
+                         "2020",
+                         "2021",
+                         "2022",
+                         "2023"),
+               selected="2018"),
+
+  selectInput("y",
+              "Select Season",
+              choices=c("Winter",
+                        "Spring",
+                        "Summer",
+                        "Fall"),
+              selected="Winter"),
+  
+  fluidRow(
+    # Left Map (width 6 out of 12 columns)
+    column(6,
+      h3("Map 1: Yolo County"),
+      plotOutput("map1")
+    ),
+
+    # Right Map (width 6 out of 12 columns)
+    column(6,
+      h3("Map 2: Davis"),
+      plotOutput("map2")
+    )
+)))
+
+
+
+
+
+server <- function(input, output, session) {
+
+  
+  
+    output$map1 <- renderPlot({
+      
+      dynamic_title <- paste("Density of Checklists in", input$y, "of", input$x)
+      
+     filtered_selection <- seasons %>%
+        filter(year_y==input$x & season==input$y) 
+    
+      ggmap(map_yolo) +
+  geom_density_2d_filled(data=filtered_selection, aes(longitude_y, latitude_y), size=1, alpha=0.5)+
+  labs(title = dynamic_title, x="Longitude", y="Latitude")+
+  theme(
+    axis.title.x = element_text(vjust = -1), # Negative vjust moves it down/outward
+    axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
+  )})
+     
+      output$map2 <- renderPlot({
+        
+        dynamic_title <- paste("Density of Checklists in", input$y, "of", input$x)
+        
+        filtered_selection <- seasons %>%
+        filter(year_y==input$x & season==input$y)
+      
+      ggmap(map_davis) +
+  geom_density_2d_filled(data=filtered_selection, aes(longitude_y, latitude_y), size=1, alpha=0.5)+
+  labs(title = dynamic_title, x="Longitude", y="Latitude")+
+  theme(
+    axis.title.x = element_text(vjust = -1), # Negative vjust moves it down/outward
+    axis.title.y = element_text(vjust = 3)  # Positive vjust moves it up/outward
+  ) 
+      
+    
+  })
+  
+  
+  
+}
+
+
+
+
+
+shinyApp(ui, server)
+```
 
 
 
