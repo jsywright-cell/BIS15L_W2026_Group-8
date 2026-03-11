@@ -1,9 +1,25 @@
 library(shiny)
 library(tidyverse)
 library(shinydashboard)
+library(ggmap)
+library(ggdensity)
+library(shinydashboard)
 
+total_seasons_data <- read_csv("total_data_seasons.csv")
 
-ui <- dashboardPage(
+register_stadiamaps("c7554538-a17b-488f-9eb4-62494d62e9e5", write = FALSE)
+
+lat_yolo <- c(38.32, 38.93)
+long_yolo <- c(-122.4, -121.5)
+bbox_yolo <- make_bbox(long_yolo, lat_yolo, f=0.03)
+map_yolo <- get_stadiamap(bbox_yolo, maptype = "stamen_terrain", zoom = 11)
+
+lat_davis <- c(38.525, 38.575)
+long_davis <- c(-121.678, -121.792)
+bbox_davis <- make_bbox(long_davis, lat_davis, f=0.03)
+map_davis <- get_stadiamap(bbox_davis, maptype = "stamen_terrain", zoom = 14)
+
+ui <- fluidPage(
   
   dashboardHeader(title="Map of Yolo County and Davis by Season and Year", titleWidth = 500),
   
@@ -55,7 +71,7 @@ server <- function(input, output, session) {
     
     dynamic_title <- paste("Density of Checklists in", input$y, "of", input$x)
     
-    filtered_selection <- seasons %>%
+    filtered_selection <- total_seasons_data %>%
       filter(year_y==input$x & season==input$y) 
     
     ggmap(map_yolo) +
@@ -70,7 +86,7 @@ server <- function(input, output, session) {
     
     dynamic_title <- paste("Density of Checklists in", input$y, "of", input$x)
     
-    filtered_selection <- seasons %>%
+    filtered_selection <- total_seasons_data %>%
       filter(year_y==input$x & season==input$y)
     
     ggmap(map_davis) +

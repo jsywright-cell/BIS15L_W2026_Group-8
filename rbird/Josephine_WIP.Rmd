@@ -17,6 +17,7 @@ library(ggplot2)
 library(paletteer)
 library(patchwork)
 library(naniar)
+library(shiny)
 ```
 
 ```{r}
