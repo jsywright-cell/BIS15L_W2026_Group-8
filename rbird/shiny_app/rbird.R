@@ -31,8 +31,11 @@ ui <- tagList(
   
 dashboardPage(
   
+  
+  skin="black",
+  
   dashboardHeader(title = 
-    "Explore Bird Observations"),
+    "Explore Bird Observations", titleWidth = 300),
   
   dashboardSidebar(
     
@@ -110,13 +113,15 @@ server <- function(input, output, session) {
       group_by(common_name) %>% 
       summarize(count = n()) %>% 
       arrange(desc(count)) %>%
-      slice_head(n = 5) %>%
+      slice_head(n = 10) %>%
       ggplot(aes(x = common_name, y = count, fill = common_name)) +
       scale_fill_brewer(palette = "Set3")+
       geom_col() +
+      coord_flip() +
       theme_minimal() +
-      labs(title = paste("Top 5 Birds in", input$season, "of", input$year), x = "Bird Species", y = "Count") +
-      theme(legend.position = "none")
+      labs(title = paste("Top 10 Birds in", input$season, "of", input$year), x = "Bird Species", y = "Count") +
+      geom_text(aes(label = count), position = position_stack(vjust = 0.5))+
+      theme(legend.position ="dodge")
   
   })
   
@@ -150,5 +155,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server, 
-         # options = list(launch.browser = TRUE) for now
+         #options = list(launch.browser = TRUE)
          )
