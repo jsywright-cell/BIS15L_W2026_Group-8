@@ -228,6 +228,26 @@ ggmap(map_davis) +
         axis.text.x=element_text(angle=60, hjust = 1))+
   facet_wrap(~ year)
 ```
+## Percentage of Checklists in Davis
+
+```{r}
+samples %>%
+  filter(latitude>=38.525
+         & latitude<=38.575 
+         & longitude<=-121.678 
+         & longitude>=-121.792) %>%
+  summarise(total = n())
+```
+
+```{r}
+samples %>%
+  count()
+```
+
+```{r}
+16912/62298
+```
+
 
 ##Prepping the seasonal data
 
@@ -262,6 +282,8 @@ season_obs_w <- season_observed_local %>%
               values_from = n)
 ```
 
+##Top 5 Birding Location by Season
+
 ```{r}
 season_obs_w %>%
   arrange(desc(spring)) %>%
@@ -273,18 +295,7 @@ season_obs_w %>%
   labs(title = "Top 5 Birding Locations in Spring", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
-```{r}
-samples %>%
-  filter(latitude>=38.525
-         & latitude<=38.575 
-         & longitude<=-121.678 
-         & longitude>=-121.792) %>%
-  summarise(total = n())
-```
-```{r}
-samples %>%
-  count()
-```
+
 
 ```{r}
 season_obs_w %>%
@@ -321,6 +332,7 @@ season_obs_w %>%
   labs(title = "Top 5 Birding Locations in Winter", x="Location", y= "Number of Observations")+
   theme(legend.position = "none")
 ```
+## Checklist Count for Yolo County By Season and Year
 
 ```{r}
 season_observed %>%
@@ -329,6 +341,12 @@ season_observed %>%
   geom_bar(position = "dodge")+
   scale_fill_brewer(palette = "Set3")+
   labs(title = "Checklist Count Per Year By Season for Yolo County", x="Season", y="Checklist Count", fill="Year")
+```
+```{r}
+samples %>%
+  mutate(across(c("year"), as.factor)) %>%
+  group_by(year) %>%
+  count()
 ```
 
 ## Top 5 Birding Locations in Yolo County
@@ -379,10 +397,6 @@ samples %>%
   labs(title = "Amount of Checklists per Month from 2018-2023", x="Month", y= "Number of Checklists", color="Year")
 ```
 
-```{r}
-
-```
-
 
 ## Are more people sitting or traveling?
 
@@ -413,7 +427,7 @@ samples %>%
   geom_col()+
   facet_wrap(~ year, nrow=2)
 ```
-##
+## Species Count by Year
 
 ```{r}
 species %>%
@@ -434,19 +448,6 @@ species %>%
   geom_text(aes(label = n), vjust = 1.5, size = 3.5)
 ```
 
-
-```{r}
-samples %>%
-  mutate(across(c("year"), as.factor)) %>%
-  group_by(year) %>%
-  count()
-```
-
-```{r}
-species %>%
-  distinct(common_name) %>%
-  count()
-```
 ```{r}
 species %>%
   group_by(year) %>%
@@ -466,30 +467,37 @@ species %>%
   scale_fill_brewer(palette = "Set3")
 ```
 
+##Ranges and Densities of Checklists Durations
 
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
+  filter(observation_type!="Area") %>%
   drop_na(duration_minutes) %>%
   ggplot(aes(x=year, y=log10(duration_minutes), fill=year))+
   geom_boxplot()+
   scale_fill_brewer(palette = "Set3")+
-  labs(title = "Range of Checklist Duration by Year", x="Year", y= "Checklist Duration (log10)", fill="Year")
+  labs(title = "Range of Checklist Duration by Year", x="Year", y= "Checklist Duration (log10)", fill="Year")+
+  facet_wrap(~observation_type)
 ```
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
+  filter(observation_type!="Area") %>%
   filter(year==2018 | year==2020 | year==2023) %>%
   drop_na(duration_minutes) %>%
   ggplot(aes(x=log10(duration_minutes), fill=year))+
   geom_density(alpha=0.3)+
   scale_fill_brewer(palette = "Set3")+
-  labs(title = "Density of Checklist Durations by Year", x="Checklist Duration (log10)", y= "Density", fill="Year")
+  labs(title = "Density of Checklist Durations by Year", x="Checklist Duration (log10)", y= "Density", fill="Year")+
+  facet_wrap(~observation_type)
 ```
+##Ranges and Densities of Checklists Distances
 
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
+  filter(observation_type!="Stationary") %>%
   drop_na(effort_distance_km) %>%
   ggplot(aes(x=year, y=log10(effort_distance_km), fill=year, na.rm=T))+
   geom_boxplot()+
@@ -499,6 +507,7 @@ samples %>%
 ```{r}
 samples %>%
   mutate(across(c("year"), as.factor)) %>%
+  filter(observation_type!="Stationary") %>%
   filter(year==2018 | year==2020 | year==2023) %>%
   drop_na(effort_distance_km) %>%
   ggplot(aes(x=log10(effort_distance_km), fill=year, na.rm=T))+
@@ -506,6 +515,7 @@ samples %>%
   scale_fill_brewer(palette = "Set3")+
   labs(title = "Density of Checklist Distances by Year", x="Checklist Distance (log10)", y= "Density", fill="Year")
 ```
+##Observation Count Statistics
 
 ```{r}
 samples %>%
@@ -690,6 +700,8 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
+
+##Time Statistics
 
 ```{r}
 samples_time <- read.delim("ebd_US-CA-113_201801_202312_smp_relJan-2026_sampling.txt", quote = "", na="") %>% clean_names()
