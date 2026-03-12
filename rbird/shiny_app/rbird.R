@@ -155,5 +155,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server, 
-         #options = list(launch.browser = TRUE)
+         options = list(launch.browser = TRUE)
          )
