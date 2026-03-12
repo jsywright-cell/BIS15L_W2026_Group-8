@@ -324,23 +324,6 @@ seasonal_birds %>%
 ```
 
 
-**Shiny App**
-
-Questions - 
-
-**What is your favourite season? (Winter, Spring, Summer, Fall)
-**Do you prefer when people go the extra mile for you, would you rather meet them halfway, or do you like when others do all the work? (effort_distance_km_y >= 1, effort_distance_km<= 1, effort_distance_km == NA (or 0))
-**Do you prefer to be around a lot of people or do you like to keep to yourself? (observation_count >= 5)
-**Where is your favourite place to hang out in Davis? (different hotspots - not sure this will work though, need distinctly varying birds per hotspot)
-**Do you like the spotlight or prefer to remain in the shadows? (number_observers_y >= 5)
-
-**Shiny App pt 2**
-
-- select season
-- select year
-
-bar graph of most commonly observed bird in that season and year, with count
-
 
 
 
