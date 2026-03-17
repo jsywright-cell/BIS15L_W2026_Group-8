@@ -21,7 +21,7 @@ library(shiny)
 ```
 
 ```{r}
-setwd("~/Desktop/BIS15L_W2026_Group-8/rbird")
+#setwd("~/Desktop/BIS15L_W2026_Group-8/rbird")
 ```
 
 Data
