@@ -191,8 +191,8 @@ ggmap(map_yolo) +
 #Creating the Davis map:
 
 ```{r}
-lat_davis <- c(38.525, 38.575)
-long_davis <- c(-121.678, -121.792)
+lat_davis <- c(38.525, 38.575) # I literally just adjusted the numbers until only Davis was included in the map
+long_davis <- c(-121.678, -121.792) # I literally just adjusted the numbers until only Davis was included in the map
 bbox_davis <- make_bbox(long_davis, lat_davis, f=0.03)
 ```
 
